@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import React from "react"
 import './globals.css'
 import { Metadata } from "next"
+import Provider from './Provider'
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -41,7 +42,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           fontSans.variable
         )}
       >
+        <Provider>
         {children}
+        </Provider>
+       
         ...
       </body>
     </html>
