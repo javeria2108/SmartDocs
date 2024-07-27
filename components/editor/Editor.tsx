@@ -1,7 +1,7 @@
 'use client';
 
-import Theme from './Theme';
-import ToolbarPlugin from './ToolbarPlugin';
+import Theme from './plugins/Theme';
+import ToolbarPlugin from './plugins/ToolbarPlugin';
 import { HeadingNode } from '@lexical/rich-text';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
@@ -14,8 +14,8 @@ import React from 'react';
 import { FloatingComposer, FloatingThreads, liveblocksConfig, LiveblocksPlugin, useEditorStatus } from '@liveblocks/react-lexical'
 import Loader from '../Loader';
 
-//import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin'
 import { useThreads } from '@liveblocks/react/suspense';
+import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin';
 //import Comments from '../Comments';
 //import { DeleteModal } from '../DeleteModal';
 
@@ -60,7 +60,7 @@ export function Editor({ roomId, currentUserType }: { roomId: string, currentUse
                 placeholder={<Placeholder />}
                 ErrorBoundary={LexicalErrorBoundary}
               />
-              {/* {currentUserType === 'editor' && <FloatingToolbarPlugin />} */}
+              {currentUserType === 'editor' && <FloatingToolbarPlugin />}
               <HistoryPlugin />
               <AutoFocusPlugin />
             </div>
