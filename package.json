@@ -23,6 +23,7 @@
     "jsm-editor": "^0.0.12",
     "lexical": "^0.16.1",
     "lucide-react": "^0.416.0",
+    "nanoid": "^5.0.7",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",
