@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import {
   Dialog,
@@ -7,11 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-
+} from "@/components/ui/dialog";
 
 import { useSelf } from '@liveblocks/react/suspense';
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { Button } from "./ui/button";
 import Image from "next/image";
 import { Label } from "./ui/label";
@@ -32,12 +31,14 @@ const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: Share
   const shareDocumentHandler = async () => {
     setLoading(true);
 
-    await updateDocumentAccess({ 
-      roomId, 
-      email, 
-      userType: userType as UserType, 
-      updatedBy: user.info,
-    });
+    if (user?.info) {
+      await updateDocumentAccess({ 
+        roomId, 
+        email, 
+        userType: userType as UserType, 
+        updatedBy: user.info as User, // Type assertion here
+      });
+    }
 
     setLoading(false);
   }
@@ -95,7 +96,7 @@ const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: Share
                 creatorId={creatorId}
                 email={collaborator.email}
                 collaborator={collaborator}
-                user={user.info}
+                user={user.info as User} // Type assertion here
               />
             ))}
           </ul>
@@ -105,4 +106,4 @@ const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: Share
   )
 }
 
-export default ShareModal
+export default ShareModal;
