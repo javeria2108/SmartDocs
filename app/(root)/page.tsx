@@ -16,7 +16,6 @@ const Home = async () => {
   if(!clerkUser) redirect('/sign-in');
 
   const roomDocuments = await getDocuments(clerkUser.emailAddresses[0].emailAddress);
-  const documents=[]
 
   return (
     <main className="home-container">
@@ -29,7 +28,7 @@ const Home = async () => {
         </div>
       </Header>
 
-       {/* {roomDocuments.data.length > 0 ? (
+      {roomDocuments.data.length > 0 ? (
         <div className="document-list-container">
           <div className="document-list-title">
             <h3 className="text-28-semibold">All documents</h3>
@@ -56,11 +55,11 @@ const Home = async () => {
                   </div>
                 </Link>
                 {/* <DeleteModal roomId={id} /> */}
-               {/* </li>
+              </li>
             ))}
           </ul>
         </div>
-      ): ( */} 
+      ): (
         <div className="document-list-empty">
           <Image 
             src="/assets/icons/doc.svg"
@@ -75,7 +74,7 @@ const Home = async () => {
             email={clerkUser.emailAddresses[0].emailAddress}
           />
         </div>
-       
+      )}
     </main>
   )
 }
