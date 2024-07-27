@@ -6,7 +6,7 @@ import Header from '@/components/Header'
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
 import ActiveCollaborators from './ActiveCollaborators';
 import { useEffect, useRef, useState } from 'react';
-//import { Input } from './ui/input';
+import { Input } from './ui/input';
 import Image from 'next/image';
 import { updateDocument } from '@/lib/actions/room.actions';
 import Loader from './Loader';
@@ -18,7 +18,8 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
   const [loading, setLoading] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null); 
+
 
   const updateTitleHandler = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if(e.key === 'Enter') {
@@ -68,7 +69,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
         <div className="collaborative-room">
           <Header>
             <div ref={containerRef} className="flex w-fit items-center justify-center gap-2">
-              {/* {editing && !loading ? (
+              {editing && !loading ? (
                 <Input 
                   type="text"
                   value={documentTitle}
@@ -76,14 +77,14 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
                   placeholder="Enter title"
                   onChange={(e) => setDocumentTitle(e.target.value)}
                   onKeyDown={updateTitleHandler}
-                  disable={!editing}
+                  disabled={!editing}
                   className="document-title-input"
                 />
               ) : (
                 <>
                   <p className="document-title">{documentTitle}</p>
                 </>
-              )} */}
+              )}
 
               {currentUserType === 'editor' && !editing && (
                 <Image 
@@ -120,7 +121,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
               </SignedIn>
             </div>
           </Header>
-        <Editor />
+        <Editor roomId={roomId} currentUserType={currentUserType} />
         </div>
       </ClientSideSuspense>
     </RoomProvider>

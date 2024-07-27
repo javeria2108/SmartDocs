@@ -16,7 +16,7 @@ import Loader from '../Loader';
 
 import { useThreads } from '@liveblocks/react/suspense';
 import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin';
-//import Comments from '../Comments';
+import Comments from '../Comments';
 //import { DeleteModal } from '../DeleteModal';
 
 // Catch any errors that occur during Lexical updates and log them
@@ -69,7 +69,7 @@ export function Editor({ roomId, currentUserType }: { roomId: string, currentUse
           <LiveblocksPlugin>
             <FloatingComposer className="w-[350px]" />
             <FloatingThreads threads={threads} />
-            {/* <Comments /> */}
+            <Comments />
           </LiveblocksPlugin>
         </div>
       </div>
