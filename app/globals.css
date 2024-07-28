@@ -8,25 +8,25 @@
 
 @layer base {
   :root {
-    --destructive-foreground: 60 100% 98%;
-    --secondary-foreground: 60 100% 98%;
-    --popover-foreground: 60 100% 98%;
-    --primary-foreground: 60 100% 98%;
-    --accent-foreground: 240 3% 9%;
-    --muted-foreground: 60 100% 98%;
-    --card-foreground: 60 100% 98%;
-    --destructive: 0 100% 50%;
-    --background: 240 3% 9%;
-    --foreground: 60 100% 98%;
-    --secondary: 180 100% 27%;
-    --popover: 240 3% 12%;
-    --primary: 300 100% 50%;
-    --border: 240 3% 20%;
-    --accent: 60 100% 50%;
-    --muted: 240 3% 15%;
-    --input: 240 3% 35%;
-    --card: 240 3% 12%;
-    --ring: 300 100% 50%;
+    --destructive-foreground: 255 85% 95%;
+    --secondary-foreground: 255 85% 95%;
+    --popover-foreground: 255 85% 95%;
+    --primary-foreground: 255 85% 95%;
+    --accent-foreground: 255 85% 20%;
+    --muted-foreground: 255 85% 95%;
+    --card-foreground: 255 85% 95%;
+    --destructive: 340 95% 50%;
+    --background: 230 60% 20%;
+    --foreground: 255 85% 95%;
+    --secondary: 260 60% 60%;
+    --popover: 230 60% 30%;
+    --primary: 250 60% 50%;
+    --border: 230 60% 35%;
+    --accent: 260 60% 50%;
+    --muted: 230 60% 40%;
+    --input: 230 60% 50%;
+    --card: 230 60% 30%;
+    --ring: 250 60% 50%;
     --radius: 0.5rem;
   }
 
@@ -72,7 +72,7 @@
   }
 
   .toolbar-item {
-    @apply bg-[#1e2a38] p-2 rounded-md cursor-pointer text-white;
+    @apply bg-[#2a2d3e] p-2 rounded-md cursor-pointer text-white;
   }
 
   .toolbar-item.spaced {
@@ -101,10 +101,10 @@
   }
 
   .gradient-blue {
-    @apply bg-gradient-to-t from-blue-500 to-blue-400;
+    @apply bg-gradient-to-t from-blue-600 to-blue-400;
   }
   .gradient-red {
-    @apply bg-gradient-to-t from-red-500 to-red-400;
+    @apply bg-gradient-to-t from-red-600 to-red-400;
   }
 
   .shad-dialog {
@@ -192,11 +192,11 @@
   }
 
   .comment-composer {
-    @apply w-full max-w-[800px] border border-dark-300 bg-dark-200 shadow-sm lg:w-[350px];
+    @apply w-full max-w-[800px] border border-dark-300 bg-doc shadow-sm lg:w-[350px];
   }
 
   .comment-thread {
-    @apply w-full max-w-[800px] border border-dark-300 bg-dark-200 shadow-sm lg:w-[350px] transition-all;
+    @apply w-full max-w-[800px] border border-dark-300 bg-doc shadow-sm lg:w-[350px] transition-all;
   }
 
   .loader {
