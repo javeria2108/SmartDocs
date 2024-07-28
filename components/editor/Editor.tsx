@@ -19,11 +19,6 @@ import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin';
 import Comments from '../Comments';
 import { DeleteModal } from '../DeleteModal';
 import AIPanel from '@/components/AIPanel';
-import ShareModal from '../ShareModal'
-
-// Catch any errors that occur during Lexical updates and log them
-// or throw them as needed. If you don't throw them, Lexical will
-// try to recover gracefully without losing user data.
 
 function Placeholder() {
   return <div className="editor-placeholder">Enter some rich text...</div>;
@@ -77,14 +72,6 @@ export function Editor({ roomId, currentUserType, collaborators, creatorId }: { 
             <FloatingThreads threads={threads} />
             <div className="side-panel-container">
               <Comments />
-              {currentUserType === 'editor' && (
-              <ShareModal
-                roomId={roomId}
-                collaborators={collaborators}
-                creatorId={creatorId}
-                currentUserType={currentUserType}
-              />
-            )}
               <AIPanel />
             </div>
           </LiveblocksPlugin>
