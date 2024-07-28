@@ -192,11 +192,11 @@
   }
 
   .comment-composer {
-    @apply w-full max-w-[800px] border border-dark-300 bg-dark-200 shadow-sm lg:w-[350px];
+    @apply w-full max-w-[800px] border border-dark-300 bg-doc shadow-sm lg:w-[350px];
   }
 
   .comment-thread {
-    @apply w-full max-w-[800px] border border-dark-300 bg-dark-200 shadow-sm lg:w-[350px] transition-all;
+    @apply w-full max-w-[800px] border border-dark-300 bg-doc shadow-sm lg:w-[350px] transition-all;
   }
 
   .loader {
