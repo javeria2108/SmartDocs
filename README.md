@@ -3,7 +3,7 @@
 Clone this repository (for contributing, fork this repository first, then clone) using this command:  
 
 ```bash
-git clone https://github.com/javeria2108/docs-clone
+git clone https://github.com/javeria2108/SmartDocs
 ```
 
 then install all the dependencies using: 
