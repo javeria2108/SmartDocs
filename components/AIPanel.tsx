@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
 
 const AIPanel = () => {
     const [aiPrompt, setAiPrompt] = useState<string>('');
-    const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [editor] = useLexicalComposerContext();
 
     function onChangePrompt(event: React.ChangeEvent<HTMLInputElement>) {
         const { value } = event.target;
@@ -30,7 +32,12 @@ const AIPanel = () => {
             }
 
             const result = await response.json();
-            setData(result.response);
+            editor.update(() => {
+                const root = $getRoot();
+                const paragraph = $createParagraphNode();
+                paragraph.append($createTextNode(result.response));
+                root.append(paragraph);
+            });
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -66,7 +73,6 @@ const AIPanel = () => {
 
             <div>
                 {error && <p className="text-red-500">{error}</p>}
-                {data && <div className="ai-response">{data}</div>}
             </div>
         </div>
     );
