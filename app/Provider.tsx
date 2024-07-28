@@ -2,38 +2,52 @@
 
 import Loader from '@/components/Loader';
 import { getClerkUsers } from '@/lib/actions/user.actions';
-//import Loader from '@/components/Loader';
-//import { getClerkUsers, getDocumentUsers } from '@/lib/actions/user.actions';
-import { useUser } from '@clerk/nextjs';
+import { useUser as useClerkUser } from '@clerk/nextjs';
 import { ClientSideSuspense, LiveblocksProvider } from '@liveblocks/react/suspense';
 import { ReactNode } from 'react';
+import { UserProvider } from '@/components/UserContext';
 
-const Provider = ({ children }: { children: ReactNode}) => {
-  const { user: clerkUser } = useUser();
+interface CustomUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  color: string;
+}
+
+const Provider = ({ children }: { children: ReactNode }) => {
+  const { user: clerkUser } = useClerkUser();
+
+  const getClerkUser = (user: any): CustomUser | null => {
+    if (user) {
+      return {
+        id: user.id,
+        email: user.primaryEmailAddress?.emailAddress || '',
+        avatar: user.profileImageUrl,
+        color: '#000000', // Provide a default or calculated value for color
+        name: user.fullName || user.firstName || 'Anonymous',
+      };
+    }
+    return null;
+  };
+
+  const user = getClerkUser(clerkUser);
 
   return (
     <LiveblocksProvider 
       authEndpoint="/api/liveblocks-auth"
       resolveUsers={async ({ userIds }) => {
-        const users = await getClerkUsers({ userIds});
-
+        const users = await getClerkUsers({ userIds });
         return users;
       }}
-    //   resolveMentionSuggestions={async ({ text, roomId }) => {
-    //     const roomUsers = await getDocumentUsers({
-    //       roomId,
-    //       currentUser: clerkUser?.emailAddresses[0].emailAddress!,
-    //       text,
-    //     })
-
-    //     return roomUsers;
-    //   }}
     >
       <ClientSideSuspense fallback={<Loader />}>
-        {children}
+        <UserProvider user={user}>
+          {children}
+        </UserProvider>
       </ClientSideSuspense>
     </LiveblocksProvider>
   )
 }
 
-export default Provider
+export default Provider;

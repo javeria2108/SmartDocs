@@ -11,13 +11,14 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
 import React from 'react';
 
-import { FloatingComposer, FloatingThreads, liveblocksConfig, LiveblocksPlugin, useEditorStatus } from '@liveblocks/react-lexical'
+import { FloatingComposer, FloatingThreads, liveblocksConfig, LiveblocksPlugin, useEditorStatus } from '@liveblocks/react-lexical';
 import Loader from '../Loader';
 
 import { useThreads } from '@liveblocks/react/suspense';
 import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin';
 import Comments from '../Comments';
 import { DeleteModal } from '../DeleteModal';
+import ShareModal from '../ShareModal'
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -27,7 +28,7 @@ function Placeholder() {
   return <div className="editor-placeholder">Enter some rich text...</div>;
 }
 
-export function Editor({ roomId, currentUserType }: { roomId: string, currentUserType: UserType }) {
+export function Editor({ roomId, currentUserType, collaborators, creatorId }: { roomId: string, currentUserType: UserType, collaborators: User[], creatorId: string }) {
   const status = useEditorStatus();
   const { threads } = useThreads();
 
@@ -45,13 +46,17 @@ export function Editor({ roomId, currentUserType }: { roomId: string, currentUse
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="editor-container size-full">
-        <div className="toolbar-wrapper flex min-w-full justify-between">
-          <ToolbarPlugin />
-          {currentUserType === 'editor' && <DeleteModal roomId={roomId} />}
-        </div>
+        {currentUserType === 'editor' && (
+          <div className="toolbar-wrapper flex min-w-full justify-between mb-4">
+            <ToolbarPlugin />
+            <DeleteModal roomId={roomId} />
+          </div>
+        )}
 
         <div className="editor-wrapper flex flex-col items-center justify-start">
-          {status === 'not-loaded' || status === 'loading' ? <Loader /> : (
+          {status === 'not-loaded' || status === 'loading' ? (
+            <Loader />
+          ) : (
             <div className="editor-inner min-h-[1100px] relative mb-5 h-fit w-full max-w-[800px] shadow-md lg:mb-10">
               <RichTextPlugin
                 contentEditable={
@@ -70,6 +75,14 @@ export function Editor({ roomId, currentUserType }: { roomId: string, currentUse
             <FloatingComposer className="w-[350px]" />
             <FloatingThreads threads={threads} />
             <Comments />
+            {currentUserType === 'editor' && (
+              <ShareModal
+                roomId={roomId}
+                collaborators={collaborators}
+                creatorId={creatorId}
+                currentUserType={currentUserType}
+              />
+            )}
           </LiveblocksPlugin>
         </div>
       </div>
