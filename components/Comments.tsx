@@ -2,7 +2,8 @@ import { cn } from '@/lib/utils';
 import { useIsThreadActive } from '@liveblocks/react-lexical';
 import { Composer, Thread } from '@liveblocks/react-ui';
 import { useThreads } from '@liveblocks/react/suspense';
-import React from 'react'
+import React from 'react';
+import { useSelf } from '@liveblocks/react'; // Import the useSelf hook
 
 const ThreadWrapper = ({ thread }: ThreadWrapperProps) => {
   const isActive = useIsThreadActive(thread.id);
@@ -21,11 +22,12 @@ const ThreadWrapper = ({ thread }: ThreadWrapperProps) => {
 
 const Comments = () => {
   const { threads } = useThreads();
+  const self = useSelf(); // Get the current user
 
   return (
     <div className="comments-container">
-      <Composer className="comment-composer" />
-
+      {/* Remove the user prop */}
+      <Composer className="comment-composer" /> 
       {threads.map((thread) => (
         <ThreadWrapper key={thread.id} thread={thread} />
       ))}
@@ -33,4 +35,4 @@ const Comments = () => {
   )
 }
 
-export default Comments
+export default Comments;
