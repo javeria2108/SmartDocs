@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
+import { SendHorizonal, Loader2 } from 'lucide-react';
+
 
 const AIPanel = () => {
     const [aiPrompt, setAiPrompt] = useState<string>('');
@@ -9,7 +11,7 @@ const AIPanel = () => {
     const [error, setError] = useState<string | null>(null);
     const [editor] = useLexicalComposerContext();
 
-    function onChangePrompt(event: React.ChangeEvent<HTMLInputElement>) {
+    function onChangePrompt(event: React.ChangeEvent<HTMLTextAreaElement>) {
         const { value } = event.target;
         setAiPrompt(value);
     }
@@ -50,24 +52,37 @@ const AIPanel = () => {
     }
 
     return (
-        <div className="comments-container">
-            <div>
-                <input
-                    type="text"
-                    name='aiPrompt'
-                    onChange={onChangePrompt}
+        <div className="bg-[#1e1e20]">
+            <div className='w-full border flex flex-col gap-5 items-end p-5'>
+                <textarea
+                    name="aiPrompt"
+                    id="aiPrompt"
+                    placeholder='Write a prompt for the AI. eg. "Write a story about a dragon and a knight"'
                     value={aiPrompt}
-                    placeholder="Enter AI Prompt"
-                    className='px-2 py-4'
-                />
+                    onChange={onChangePrompt}
+                    className='w-full h-24 p-2 text-gray-50 bg-transparent'
+                >
+
+                </textarea>
+
 
                 <Button
                     type="button"
-                    className="gradient-blue flex gap-1 shadow-md"
+                    className="gradient-blue flex gap-1 shadow-md float-right "
                     onClick={submitAIPrompt}
                     disabled={loading}
                 >
-                    {loading ? 'Sending...' : 'Send'}
+                    {loading
+                        ? <span className='flex justify-center items-center gap-2'>
+                            Generating 
+                            <Loader2 height={14} width={14} 
+                                className='animate-spin'
+                            />
+                        </span> :
+                        <span className='flex justify-center items-center gap-2'>
+                            Generate <SendHorizonal height={14} width={14} />
+                        </span>
+                    }
                 </Button>
             </div>
 
