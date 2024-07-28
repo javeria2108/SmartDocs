@@ -44,7 +44,7 @@ const Home = async () => {
               <li key={id} className="document-list-item">
                 <Card className="flex items-center justify-between bg-[#1e2a38] text-white p-4 rounded-lg w-full max-w-[730px]">
                   <Link href={`/documents/${id}`} className="flex flex-1 items-center space-x-4">
-                    <FileTypeIcon className="w-10 h-10 text-blue-500" />
+                    <FileTypeIcon className="w-10 h-10 text-[#15D088]" />
                     <div>
                       <h3 className="text-lg font-semibold">{metadata.title}</h3>
                       <p className="text-sm text-gray-400">Created about {dateConverter(createdAt)}</p>

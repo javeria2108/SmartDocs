@@ -35,7 +35,8 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body;
+    @apply text-foreground font-body;
+    background-color: #050C1A
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -80,7 +81,7 @@
   }
 
   .toolbar-item.active {
-    @apply bg-blue-500;
+    @apply bg-[#32C68E];
   }
 
   .toolbar-item i {
@@ -101,7 +102,7 @@
   }
 
   .gradient-blue {
-    @apply bg-gradient-to-t from-blue-500 to-blue-400;
+    @apply bg-gradient-to-t from-[#29b07c] to-[#118055];
   }
   .gradient-red {
     @apply bg-gradient-to-t from-red-500 to-red-400;
@@ -241,7 +242,7 @@
 .cl-socialButtonsBlockButton,
 .cl-socialButtonsBlockButton:hover {
   height: 40px;
-  background-color: #3371ff;
+  background-color: #32C68E;
   color: hsl(var(--foreground));
 }
 

@@ -25,7 +25,7 @@ const fontBody = Syne({
 });
 
 export const metadata: Metadata = {
-  title: 'LiveDocs',
+  title: 'SmartDocs',
   description: 'Your go-to collaborative editor',
 };
 

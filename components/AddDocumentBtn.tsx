@@ -22,7 +22,7 @@ const AddDocumentBtn = ({ userId, email }: AddDocumentBtnProps) => {
     <Button
       type="button"
       onClick={addDocumentHandler}
-      className="bg-[#1a73e8] text-white flex items-center justify-center px-4 py-2 rounded-md shadow-md hover:bg-pink-500"
+      className="bg-[#15D088] text-white flex items-center justify-center px-4 py-2 rounded-md shadow-md hover:bg-pink-500"
     >
       <PlusIcon className="mr-2 h-5 w-5" />
       <p className="hidden sm:block">Start a blank document</p>

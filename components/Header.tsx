@@ -5,11 +5,11 @@ import { SVGProps } from 'react';
 
 const Header = ({ children, className }: HeaderProps) => {
   return (
-    <header className={cn("w-full bg-[#0f172a] px-4", className)}>
+    <header className={cn("w-full bg-[#000000] px-4", className)}>
       <div className="flex items-center justify-between h-16 max-w-screen-xl mx-auto w-full">
         <Link href='/' className="flex items-center">
-          <FolderIcon className="w-8 h-8 text-[#00f5ff]" />
-          <span className="ml-2 text-xl font-bold text-white">LiveDocs</span>
+          <FolderIcon className="w-8 h-8 text-[#08B371]" />
+          <span className="ml-2 text-xl font-bold text-white">SmartDocs</span>
         </Link>
         <div className="flex items-center">
           {children}
