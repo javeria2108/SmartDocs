@@ -18,6 +18,7 @@ import { useThreads } from '@liveblocks/react/suspense';
 import FloatingToolbarPlugin from './plugins/FloatingToolbarPlugin';
 import Comments from '../Comments';
 import { DeleteModal } from '../DeleteModal';
+import AIPanel from '@/components/AIPanel';
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -69,7 +70,10 @@ export function Editor({ roomId, currentUserType }: { roomId: string, currentUse
           <LiveblocksPlugin>
             <FloatingComposer className="w-[350px]" />
             <FloatingThreads threads={threads} />
-            <Comments />
+            <div className="side-panel-container">
+              <Comments />
+              <AIPanel />
+            </div>
           </LiveblocksPlugin>
         </div>
       </div>
