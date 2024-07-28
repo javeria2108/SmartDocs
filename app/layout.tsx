@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 import Provider from './Provider';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       }}
     >
       <html lang="en" suppressHydrationWarning>
+      <GoogleAnalytics />
         <body
           className={cn(
             'min-h-screen font-sans antialiased',
@@ -52,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </Provider>
         </body>
+        
       </html>
     </ClerkProvider>
   );
