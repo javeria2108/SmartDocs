@@ -1,43 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { currentUser } from '@/lib/session';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generationError } from '@/lib/generation-error';
 
 export async function POST(request: NextRequest) {
-    if (!await currentUser()) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return NextResponse.json({ message: 'API Key Does not Exist' }, { status: 500 });
+  if (!await currentUser()) return NextResponse.json({ message: 'Please sign in to generate text.' }, { status: 401 });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return NextResponse.json({ message: 'AI text generation is temporarily unavailable.' }, { status: 503 });
 
-    const data = await request.json();
-    const prompt = data.prompt;
-    if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 8000) return NextResponse.json({ message: 'Enter a prompt of up to 8000 characters.' }, { status: 400 });
+  let data: unknown;
+  try { data = await request.json(); }
+  catch { return NextResponse.json({ message: 'Send a valid text prompt.' }, { status: 400 }); }
+  const prompt = data && typeof data === 'object' && 'prompt' in data ? data.prompt : undefined;
+  if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 8000) {
+    return NextResponse.json({ message: 'Enter a prompt of up to 8000 characters.' }, { status: 400 });
+  }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+  try {
+    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
+      model: process.env.GEMINI_MODEL || 'gemini-flash-lite-latest',
     });
-
-    const generationConfig = {
-        temperature: 1,
-        topP: 0.95,
-        topK: 64,
-        maxOutputTokens: 8192,
-        responseMimeType: "text/plain",
-    };
-
-    try {
-        const chatSession = model.startChat({
-            generationConfig,
-            history: [],
-        });
-
-        const result = await chatSession.sendMessage(prompt);
-
-        return NextResponse.json({ response: result.response.text() }, { status: 200 });
-    } catch (e) {
-        if (e instanceof Error) {
-            return NextResponse.json({ message: e.message }, { status: 500 });
-        }
-        return NextResponse.json({ message: 'Unknown Error' }, { status: 500 });
-    }
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt.trim() }] }],
+      generationConfig: { temperature: 1, topP: 0.95, topK: 64, maxOutputTokens: 8192, responseMimeType: 'text/plain' },
+    });
+    const text = result.response.text();
+    if (!text.trim()) return NextResponse.json({ message: 'No text was generated. Please try another prompt.' }, { status: 422 });
+    return NextResponse.json({ response: text });
+  } catch (error) {
+    // Never return raw provider errors: they can contain internal request details.
+    const failure = generationError(error);
+    return NextResponse.json({ message: failure.message }, { status: failure.status });
+  }
 }

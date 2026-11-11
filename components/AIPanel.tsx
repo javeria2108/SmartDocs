@@ -29,15 +29,16 @@ const AIPanel = () => {
                 body: JSON.stringify({ prompt: aiPrompt }),
             });
 
+            const result: { response?: unknown; message?: unknown } | null = await response.json().catch(() => null);
             if (!response.ok) {
-                throw new Error('Failed to fetch');
+                throw new Error(typeof result?.message === 'string' ? result.message : 'AI text generation failed. Please try again.');
             }
-
-            const result = await response.json();
+            const text = result?.response;
+            if (typeof text !== 'string' || !text.trim()) throw new Error('No text was generated. Please try another prompt.');
             editor.update(() => {
                 const root = $getRoot();
                 const paragraph = $createParagraphNode();
-                paragraph.append($createTextNode(result.response));
+                paragraph.append($createTextNode(text));
                 root.append(paragraph);
             });
         } catch (err) {
@@ -57,6 +58,8 @@ const AIPanel = () => {
                 <textarea
                     name="aiPrompt"
                     id="aiPrompt"
+                    aria-label="AI writing prompt"
+                    maxLength={8000}
                     placeholder='Write a prompt for the AI. eg. "Write a story about a dragon and a knight"'
                     value={aiPrompt}
                     onChange={onChangePrompt}
@@ -70,7 +73,7 @@ const AIPanel = () => {
                     type="button"
                     className="gradient-blue flex gap-1 shadow-md float-right "
                     onClick={submitAIPrompt}
-                    disabled={loading}
+                    disabled={loading || !aiPrompt.trim()}
                 >
                     {loading
                         ? <span className='flex justify-center items-center gap-2'>
@@ -87,7 +90,7 @@ const AIPanel = () => {
             </div>
 
             <div>
-                {error && <p className="text-red-500">{error}</p>}
+                {error && <p role="alert" className="text-red-300">{error}</p>}
             </div>
         </div>
     );
