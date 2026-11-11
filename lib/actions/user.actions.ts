@@ -1,46 +1,24 @@
 'use server';
+import { requireUser } from '../session';
+import { findUsers } from '../users';
+import { liveblocks } from '../liveblocks';
+import { assertDocumentAccess } from '../permissions';
 
-import { clerkClient } from "@clerk/nextjs/server";
-import { parseStringify } from "../utils";
-import { liveblocks } from "../liveblocks";
-
-export const getClerkUsers = async ({ userIds }: { userIds: string[]}) => {
-  try {
-    const { data } = await clerkClient.users.getUserList({
-      emailAddress: userIds,
-    });
-
-    const users = data.map((user) => ({
-      id: user.id,
-      name: `${user.firstName} ${user.lastName}`,
-      email: user.emailAddresses[0].emailAddress,
-      avatar: user.imageUrl,
-    }));
-
-    const sortedUsers = userIds.map((email) => users.find((user) => user.email === email));
-
-    return parseStringify(sortedUsers);
-  } catch (error) {
-    console.log(`Error fetching users: ${error}`);
-  }
+export async function getUsers({ userIds }: { userIds: string[] }) {
+  const user = await requireUser();
+  if (!Array.isArray(userIds) || userIds.length > 100 || userIds.some(id => typeof id !== 'string' || id.length > 128)) throw new Error('Invalid user lookup.');
+  const { data: rooms } = await liveblocks.getRooms({ userId: user.id });
+  const allowed = new Set([user.id, ...rooms.flatMap(room => Object.keys(room.usersAccesses))]);
+  const users = await findUsers(userIds.filter(id => allowed.has(id)));
+  const byId = new Map(users.filter((item): item is User => Boolean(item)).map(item => [item.id, item]));
+  return userIds.map(id => byId.get(id));
 }
 
-export const getDocumentUsers = async ({ roomId, currentUser, text }: { roomId: string, currentUser: string, text: string }) => {
-  try {
-    const room = await liveblocks.getRoom(roomId);
-
-    const users = Object.keys(room.usersAccesses).filter((email) => email !== currentUser);
-
-    if(text.length) {
-      const lowerCaseText = text.toLowerCase();
-
-      const filteredUsers = users.filter((email: string) => email.toLowerCase().includes(lowerCaseText))
-
-      return parseStringify(filteredUsers);
-    }
-
-    return parseStringify(users);
-  } catch (error) {
-    console.log(`Error fetching document users: ${error}`);
-  }
+export async function getDocumentUsers({ roomId, text }: { roomId: string; currentUser?: string; text: string }) {
+  const user = await requireUser();
+  const room = await liveblocks.getRoom(roomId);
+  assertDocumentAccess(room, user.id);
+  const users = await findUsers(Object.keys(room.usersAccesses));
+  const query = text.slice(0, 100).toLowerCase();
+  return users.filter((item): item is User => Boolean(item && item.id !== user.id && (item.email.toLowerCase().includes(query) || item.name.toLowerCase().includes(query)))).map(item => item.id);
 }

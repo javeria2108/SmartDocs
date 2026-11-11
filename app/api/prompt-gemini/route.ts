@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { currentUser } from '@/lib/session';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(request: NextRequest) {
+    if (!await currentUser()) return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return NextResponse.json({ message: 'API Key Does not Exist' }, { status: 500 });
 
     const data = await request.json();
     const prompt = data.prompt;
+    if (typeof prompt !== 'string' || !prompt.trim() || prompt.length > 8000) return NextResponse.json({ message: 'Enter a prompt of up to 8000 characters.' }, { status: 400 });
 
     const genAI = new GoogleGenerativeAI(apiKey);
 

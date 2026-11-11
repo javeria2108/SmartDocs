@@ -3,36 +3,40 @@ import React, { useState } from 'react'
 import UserTypeSelector from './UserTypeSelector';
 import { Button } from './ui/button';
 import { removeCollaborator, updateDocumentAccess } from '@/lib/actions/room.actions';
+import { useRouter } from 'next/navigation';
 
-const Collaborator = ({ roomId, creatorId, collaborator, email, user }: CollaboratorProps) => {
+const Collaborator = ({ roomId, creatorId, collaborator, email }: CollaboratorProps) => {
+  const router = useRouter();
+  const [error, setError] = useState('');
   const [userType, setUserType] = useState(collaborator.userType || 'viewer');
   const [loading, setLoading] = useState(false);
 
   const shareDocumentHandler = async (type: string) => {
     setLoading(true);
 
-    await updateDocumentAccess({ 
-      roomId, 
-      email, 
-      userType: type as UserType, 
-      updatedBy: user 
+    try { await updateDocumentAccess({
+      roomId,
+      email,
+      userType: type as UserType,
     });
-
-    setLoading(false);
+    setError(''); router.refresh(); }
+    catch { setError('Unable to update access.'); }
+    finally { setLoading(false); }
   }
 
   const removeCollaboratorHandler = async (email: string) => {
     setLoading(true);
 
-    await removeCollaborator({ roomId, email });
-
-    setLoading(false);
+    try { await removeCollaborator({ roomId, email }); setError(''); router.refresh(); }
+    catch { setError('Unable to remove this collaborator.'); }
+    finally { setLoading(false); }
   }
 
   return (
-    <li className="flex items-center justify-between gap-2 py-3">
+    <li className="flex flex-wrap items-center justify-between gap-2 py-3">
+      {error && <p role="alert" className="w-full text-sm text-red-300">{error}</p>}
       <div className="flex gap-2">
-        <Image 
+        <Image
           src={collaborator.avatar}
           alt={collaborator.name}
           width={36}
@@ -56,7 +60,7 @@ const Collaborator = ({ roomId, creatorId, collaborator, email, user }: Collabor
         <p className="text-sm text-blue-100">Owner</p>
       ): (
         <div className="flex items-center">
-          <UserTypeSelector 
+          <UserTypeSelector
             userType={userType as UserType}
             setUserType={setUserType || 'viewer'}
             onClickHandler={shareDocumentHandler}

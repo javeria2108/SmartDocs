@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx scripts/migrate-auth.ts",
+    "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.2.8",
-    "@clerk/themes": "^2.1.14",
     "@google/generative-ai": "^0.16.0",
     "@lexical/react": "^0.16.1",
     "@liveblocks/client": "^2.4.0",
@@ -24,14 +25,16 @@
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
-    "@sentry/nextjs": "^8.20.0",
+    "@sentry/nextjs": "^8.55.2",
+    "better-auth": "^1.7.21",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "jsm-editor": "^0.0.12",
     "lexical": "^0.16.1",
     "lucide-react": "^0.416.0",
-    "nanoid": "^5.0.7",
-    "next": "14.2.5",
+    "nanoid": "^5.1.16",
+    "next": "^15.5.29",
+    "pg": "^8.23.1",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.4.0",
@@ -39,13 +42,18 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
-    "eslint-config-next": "14.2.5",
-    "postcss": "^8",
+    "eslint-config-next": "^15.5.29",
+    "postcss": "^8.5.32",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

@@ -18,11 +18,14 @@ import { Input } from "./ui/input";
 import UserTypeSelector from "./UserTypeSelector";
 import Collaborator from "./Collaborator";
 import { updateDocumentAccess } from "@/lib/actions/room.actions";
+import { useRouter } from 'next/navigation';
 
 const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: ShareDocumentDialogProps) => {
   const user = useSelf();
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState('');
@@ -32,12 +35,11 @@ const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: Share
     setLoading(true);
 
     if (user?.info) {
-      await updateDocumentAccess({ 
-        roomId, 
-        email, 
-        userType: userType as UserType, 
-        updatedBy: user.info as User, // Type assertion here
-      });
+      try { await updateDocumentAccess({
+        roomId,
+        email,
+        userType: userType as UserType,
+      }); setError(''); setEmail(''); router.refresh(); } catch { setError('Unable to share. Check that this person has a SmartDocs account and try again.'); }
     }
 
     setLoading(false);
@@ -45,8 +47,8 @@ const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: Share
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button className="gradient-blue flex h-9 gap-1 px-4" disabled={currentUserType !== 'editor'}>
+      <DialogTrigger asChild>
+        <Button className="gradient-blue flex h-9 gap-1 px-4" disabled={currentUserType !== 'creator'}>
           <Image
             src="/assets/icons/share.svg"
             alt="share"
@@ -70,14 +72,14 @@ const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: Share
         </Label>
         <div className="flex items-center gap-3">
           <div className="flex flex-1 rounded-md bg-dark-400">
-            <Input 
+            <Input
               id="email"
               placeholder="Enter email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="share-input"
             />
-            <UserTypeSelector 
+            <UserTypeSelector
               userType={userType}
               setUserType={setUserType}
             />
@@ -87,16 +89,18 @@ const ShareModal = ({ roomId, collaborators, creatorId, currentUserType }: Share
           </Button>
         </div>
 
+        {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+        {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
         <div className="my-2 space-y-2">
           <ul className="flex flex-col">
             {collaborators.map((collaborator) => (
-              <Collaborator 
+              <Collaborator
                 key={collaborator.id}
                 roomId={roomId}
                 creatorId={creatorId}
                 email={collaborator.email}
                 collaborator={collaborator}
-                user={user.info as User} // Type assertion here
+                user={user.info as User}
               />
             ))}
           </ul>

@@ -34,7 +34,6 @@ declare type ShareDocumentParams = {
   roomId: string;
   email: string;
   userType: UserType;
-  updatedBy: User;
 };
 
 declare type UserTypeSelectorParams = {

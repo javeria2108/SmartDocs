@@ -1,143 +1,68 @@
 'use server';
-
-import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid';
 import { liveblocks } from '../liveblocks';
 import { revalidatePath } from 'next/cache';
-import { getAccessType, parseStringify } from '../utils';
 import { redirect } from 'next/navigation';
+import { requireUser } from '../session';
+import { findUserByEmail } from '../users';
+import { assertDocumentAccess, canAccessDocument } from '../permissions';
 
-export const createDocument = async ({ userId, email }: CreateDocumentParams) => {
-  const roomId = nanoid();
-
-  try {
-    const metadata = {
-      creatorId: userId,
-      email,
-      title: 'Untitled'
-    }
-
-    const usersAccesses: RoomAccesses = {
-      [email]: ['room:write']
-    }
-
-    const room = await liveblocks.createRoom(roomId, {
-      metadata,
-      usersAccesses,
-      defaultAccesses: []
-    });
-    
-    revalidatePath('/');
-
-    return parseStringify(room);
-  } catch (error) {
-    console.log(`Error happened while creating a room: ${error}`);
-  }
+export async function createDocument() {
+  const user = await requireUser();
+  const room = await liveblocks.createRoom(nanoid(), {
+    metadata: { creatorId: user.id, email: user.email, title: 'Untitled' },
+    usersAccesses: { [user.id]: ['room:write'] }, defaultAccesses: [],
+  });
+  revalidatePath('/');
+  return room;
 }
-
-export const getDocument = async ({ roomId, userId }: { roomId: string; userId: string }) => {
-  try {
-      const room = await liveblocks.getRoom(roomId);
-    
-      const hasAccess = Object.keys(room.usersAccesses).includes(userId);
-    
-      if(!hasAccess) {
-        throw new Error('You do not have access to this document');
-      }
-    
-      return parseStringify(room);
-  } catch (error) {
-    console.log(`Error happened while getting a room: ${error}`);
-  }
+export async function getDocument(roomId: string) {
+  const user = await requireUser();
+  const room = await liveblocks.getRoom(roomId);
+  return canAccessDocument(room, user.id) ? room : null;
 }
-
-export const updateDocument = async (roomId: string, title: string) => {
-  try {
-    const updatedRoom = await liveblocks.updateRoom(roomId, {
-      metadata: {
-        title
-      }
-    })
-
-    revalidatePath(`/documents/${roomId}`);
-
-    return parseStringify(updatedRoom);
-  } catch (error) {
-    console.log(`Error happened while updating a room: ${error}`);
-  }
+export async function getDocuments() {
+  const user = await requireUser();
+  return liveblocks.getRooms({ userId: user.id });
 }
-
-export const getDocuments = async (email: string ) => {
-  try {
-      const rooms = await liveblocks.getRooms({ userId: email });
-    
-      return parseStringify(rooms);
-  } catch (error) {
-    console.log(`Error happened while getting rooms: ${error}`);
-  }
+export async function updateDocument(roomId: string, title: string) {
+  const user = await requireUser();
+  assertDocumentAccess(await liveblocks.getRoom(roomId), user.id, 'write');
+  if (typeof title !== 'string' || !title.trim() || title.length > 200) throw new Error('Use a title between 1 and 200 characters.');
+  const room = await liveblocks.updateRoom(roomId, { metadata: { title: title.trim() } });
+  revalidatePath('/'); revalidatePath('/documents/' + roomId);
+  return room;
 }
-
-export const updateDocumentAccess = async ({ roomId, email, userType, updatedBy }: ShareDocumentParams) => {
-  try {
-    const usersAccesses: RoomAccesses = {
-      [email]: getAccessType(userType) as AccessType,
-    }
-
-    const room = await liveblocks.updateRoom(roomId, { 
-      usersAccesses
-    })
-
-    if(room) {
-      const notificationId = nanoid();
-
-      await liveblocks.triggerInboxNotification({
-        userId: email,
-        kind: '$documentAccess',
-        subjectId: notificationId,
-        activityData: {
-          userType,
-          title: `You have been granted ${userType} access to the document by ${updatedBy.name}`,
-          updatedBy: updatedBy.name,
-          avatar: updatedBy.avatar,
-          email: updatedBy.email
-        },
-        roomId
-      })
-    }
-
-    revalidatePath(`/documents/${roomId}`);
-    return parseStringify(room);
-  } catch (error) {
-    console.log(`Error happened while updating a room access: ${error}`);
-  }
+export async function updateDocumentAccess({ roomId, email, userType }: ShareDocumentParams) {
+  const user = await requireUser();
+  const existing = await liveblocks.getRoom(roomId);
+  assertDocumentAccess(existing, user.id, 'owner');
+  if (userType !== 'editor' && userType !== 'viewer') throw new Error('Choose editor or viewer access.');
+  const collaborator = await findUserByEmail(email);
+  if (!collaborator) throw new Error('Ask this person to create a SmartDocs account first.');
+  if (collaborator.id === existing.metadata.creatorId) throw new Error('The document owner must keep owner access.');
+  const permissions: AccessType = userType === 'editor' ? ['room:write'] : ['room:read', 'room:presence:write'];
+  const room = await liveblocks.updateRoom(roomId, { usersAccesses: { [collaborator.id]: permissions } });
+  await liveblocks.triggerInboxNotification({ userId: collaborator.id, kind: '$documentAccess', subjectId: nanoid(), roomId,
+    activityData: { userType, title: 'You have been granted ' + userType + ' access to the document by ' + user.name, updatedBy: user.name, avatar: user.avatar, email: user.email },
+  });
+  revalidatePath('/documents/' + roomId);
+  return room;
 }
-
-export const removeCollaborator = async ({ roomId, email }: {roomId: string, email: string}) => {
-  try {
-    const room = await liveblocks.getRoom(roomId)
-
-    if(room.metadata.email === email) {
-      throw new Error('You cannot remove yourself from the document');
-    }
-
-    const updatedRoom = await liveblocks.updateRoom(roomId, {
-      usersAccesses: {
-        [email]: null
-      }
-    })
-
-    revalidatePath(`/documents/${roomId}`);
-    return parseStringify(updatedRoom);
-  } catch (error) {
-    console.log(`Error happened while removing a collaborator: ${error}`);
-  }
+export async function removeCollaborator({ roomId, email }: { roomId: string; email: string }) {
+  const user = await requireUser();
+  const room = await liveblocks.getRoom(roomId);
+  assertDocumentAccess(room, user.id, 'owner');
+  const collaborator = await findUserByEmail(email);
+  if (!collaborator || !room.usersAccesses[collaborator.id]) throw new Error('Collaborator not found.');
+  if (collaborator.id === room.metadata.creatorId) throw new Error('The document owner cannot be removed.');
+  const updated = await liveblocks.updateRoom(roomId, { usersAccesses: { [collaborator.id]: null } });
+  revalidatePath('/documents/' + roomId);
+  return updated;
 }
-
-export const deleteDocument = async (roomId: string) => {
-  try {
-    await liveblocks.deleteRoom(roomId);
-    revalidatePath('/');
-    redirect('/');
-  } catch (error) {
-    console.log(`Error happened while deleting a room: ${error}`);
-  }
+export async function deleteDocument(roomId: string) {
+  const user = await requireUser();
+  assertDocumentAccess(await liveblocks.getRoom(roomId), user.id, 'owner');
+  await liveblocks.deleteRoom(roomId);
+  revalidatePath('/'); redirect('/');
 }

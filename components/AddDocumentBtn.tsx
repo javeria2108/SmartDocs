@@ -5,12 +5,12 @@ import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { JSX, SVGProps } from 'react';
 
-const AddDocumentBtn = ({ userId, email }: AddDocumentBtnProps) => {
+const AddDocumentBtn = () => {
   const router = useRouter();
 
   const addDocumentHandler = async () => {
     try {
-      const room = await createDocument({ userId, email });
+      const room = await createDocument();
 
       if (room) router.push(`/documents/${room.id}`);
     } catch (error) {

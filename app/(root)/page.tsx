@@ -5,28 +5,25 @@ import Notifications from '@/components/Notifications';
 import { Button } from '@/components/ui/button'
 import { getDocuments } from '@/lib/actions/room.actions';
 import { dateConverter } from '@/lib/utils';
-import { SignedIn, UserButton } from '@clerk/nextjs';
-import { currentUser } from '@clerk/nextjs/server';
+import { AccountMenu } from '@/components/AccountMenu';
+import { requirePageUser } from '@/lib/session';
 import Image from 'next/image';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+
 import { Card } from '@/components/ui/card';
 import { JSX, SVGProps } from 'react';
 
 const Home = async () => {
-  const clerkUser = await currentUser();
-  if (!clerkUser) redirect('/sign-in');
+  const user = await requirePageUser();
 
-  const roomDocuments = await getDocuments(clerkUser.emailAddresses[0].emailAddress);
+  const roomDocuments = await getDocuments();
 
   return (
     <main className="home-container">
       <Header className="sticky left-0 top-0">
         <div className="flex items-center gap-2 lg:gap-4">
           <Notifications />
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+          <AccountMenu />
         </div>
       </Header>
 
@@ -34,10 +31,7 @@ const Home = async () => {
         <div className="document-list-container">
           <div className="document-list-title">
             <h3 className="text-28-semibold">All documents</h3>
-            <AddDocumentBtn 
-              userId={clerkUser.id}
-              email={clerkUser.emailAddresses[0].emailAddress}
-            />
+            <AddDocumentBtn />
           </div>
           <ul className="document-ul">
             {roomDocuments.data.map(({ id, metadata, createdAt }: any) => (
@@ -50,7 +44,7 @@ const Home = async () => {
                       <p className="text-sm text-gray-400">Created about {dateConverter(createdAt)}</p>
                     </div>
                   </Link>
-                  <DeleteModal roomId={id} />
+                  {metadata.creatorId === user.id && <DeleteModal roomId={id} />}
                 </Card>
               </li>
             ))}
@@ -58,17 +52,14 @@ const Home = async () => {
         </div>
       ) : (
         <div className="document-list-empty">
-          <Image 
+          <Image
             src="/assets/icons/doc.svg"
             alt="Document"
             width={40}
             height={40}
             className="mx-auto"
           />
-          <AddDocumentBtn 
-            userId={clerkUser.id}
-            email={clerkUser.emailAddresses[0].emailAddress}
-          />
+          <AddDocumentBtn />
         </div>
       )}
     </main>

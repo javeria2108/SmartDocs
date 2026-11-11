@@ -36,16 +36,16 @@ export function Editor({ roomId, currentUserType, collaborators, creatorId }: { 
       throw error;
     },
     theme: Theme,
-    editable: currentUserType === 'editor',
+    editable: currentUserType !== 'viewer',
   });
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="editor-container size-full">
-        {currentUserType === 'editor' && (
+        {currentUserType !== 'viewer' && (
           <div className="toolbar-wrapper flex min-w-full justify-between mb-4">
             <ToolbarPlugin />
-            <DeleteModal roomId={roomId} />
+            {currentUserType === 'creator' && <DeleteModal roomId={roomId} />}
           </div>
         )}
 
@@ -61,7 +61,7 @@ export function Editor({ roomId, currentUserType, collaborators, creatorId }: { 
                 placeholder={<Placeholder />}
                 ErrorBoundary={LexicalErrorBoundary}
               />
-              {currentUserType === 'editor' && <FloatingToolbarPlugin />}
+              {currentUserType !== 'viewer' && <FloatingToolbarPlugin />}
               <HistoryPlugin />
               <AutoFocusPlugin />
             </div>
@@ -72,7 +72,7 @@ export function Editor({ roomId, currentUserType, collaborators, creatorId }: { 
             <FloatingThreads threads={threads} />
             <div className="side-panel-container">
               <Comments />
-              <AIPanel />
+              {currentUserType !== 'viewer' && <AIPanel />}
             </div>
           </LiveblocksPlugin>
         </div>

@@ -1,35 +1,8 @@
-import { liveblocks } from "@/lib/liveblocks";
-import { getUserColor } from "@/lib/utils";
-import { currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-
-export async function POST(request: Request) {
-  const clerkUser = await currentUser();
-
-  if (!clerkUser) redirect('/sign-in');
-
-  const { id, firstName, lastName, emailAddresses, imageUrl } = clerkUser;
-
-  // Get the current user from your database
-  const user = {
-    id,
-    info: {
-      id,
-      name: `${firstName} ${lastName}`,
-      email: emailAddresses[0].emailAddress,
-      avatar: imageUrl,
-      //color: getUserColor(id),
-    }
-  }
-
-  //Identify the user and return the result
-  const { status, body } = await liveblocks.identifyUser(
-    {
-      userId: user.info.email,
-      groupIds: [],
-    },
-    { userInfo: user.info },
-  );
-
-  return new Response(body, { status });
+import { liveblocks } from '@/lib/liveblocks';
+import { currentUser } from '@/lib/session';
+export async function POST() {
+  const user = await currentUser();
+  if (!user) return Response.json({ message: 'Authentication required' }, { status: 401 });
+  const { status, body } = await liveblocks.identifyUser({ userId: user.id, groupIds: [] }, { userInfo: user });
+  return new Response(body, { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 }

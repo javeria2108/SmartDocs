@@ -3,7 +3,7 @@
 import { ClientSideSuspense, RoomProvider } from '@liveblocks/react/suspense';
 import { Editor } from '@/components/editor/Editor';
 import Header from '@/components/Header';
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
+import { AccountMenu } from './AccountMenu';
 import ActiveCollaborators from './ActiveCollaborators';
 import { useEffect, useRef, useState } from 'react';
 import { Input } from './ui/input';
@@ -42,7 +42,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (editing && currentUserType !== 'viewer' && containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setEditing(false);
         updateDocument(roomId, documentTitle);
       }
@@ -53,7 +53,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [roomId, documentTitle]);
+  }, [roomId, documentTitle, editing, currentUserType]);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -84,7 +84,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
                   <p className="document-title">{documentTitle}</p>
                 )}
 
-                {currentUserType === 'editor' && !editing && (
+                {currentUserType !== 'viewer' && !editing && (
                   <Image
                     src="/assets/icons/edit.svg"
                     alt="edit"
@@ -95,7 +95,7 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
                   />
                 )}
 
-                {currentUserType !== 'editor' && !editing && (
+                {currentUserType === 'viewer' && !editing && (
                   <p className="view-only-tag">View only</p>
                 )}
 
@@ -104,27 +104,22 @@ const CollaborativeRoom = ({ roomId, roomMetadata, users, currentUserType }: Col
             <div className="flex w-full flex-1 justify-end gap-2 sm:gap-3">
               <ActiveCollaborators />
 
-              <ShareModal 
+              <ShareModal
                 roomId={roomId}
                 collaborators={users}
                 creatorId={roomMetadata.creatorId}
                 currentUserType={currentUserType}
               />
 
-                <SignedOut>
-                  <SignInButton />
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
+                <AccountMenu />
               </div>
             </div>
           </Header>
-          <Editor 
-            roomId={roomId} 
-            currentUserType={currentUserType} 
-            collaborators={users} 
-            creatorId={roomMetadata.creatorId} 
+          <Editor
+            roomId={roomId}
+            currentUserType={currentUserType}
+            collaborators={users}
+            creatorId={roomMetadata.creatorId}
           />
         </div>
       </ClientSideSuspense>

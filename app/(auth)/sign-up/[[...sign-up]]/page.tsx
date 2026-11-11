@@ -1,12 +1,7 @@
-import { SignUp } from '@clerk/nextjs'
-import React from 'react'
-
-const SignUpPage = () => {
-  return (
-    <main className='auth-page'>
-        <SignUp/>
-    </main>
-  )
+import { AuthForm } from '@/components/AuthForm';
+import { currentUser } from '@/lib/session';
+import { redirect } from 'next/navigation';
+export default async function AuthPage() {
+  if (await currentUser()) redirect('/');
+  return <main className="auth-page px-4 py-10"><AuthForm mode="sign-up" /></main>;
 }
-
-export default SignUpPage
